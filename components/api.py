@@ -6,3 +6,6 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+api_bp = Blueprint('api-bp', __name__, url_prefix='/api/v1')
+
