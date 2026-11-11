@@ -56,6 +56,34 @@ def get_all_items():
 
         )
 
+@api_bp.route('/items/<int:item_id>', methods=['GET'])
+def get_item_by_id(item_id):
+     """Fetch a single item record using its unique primary key ID."""
+     logger.info(f"Fetching item with ID: {item_id}")
+
+     try:
+          item = Item.query.get(item_id)
+
+          if not item:
+               logger.warning(f"Item with ID {item_id} not found.")
+               return build_response(
+                    success=False,
+                    message=f"Resources with ID {item_id} does not exist.",
+                    status_code=404
+               )
+          return build_response(
+               success=True,
+               message="Item retrieved successfully.",
+               data=item_schema.dump(item),
+               status_code=200
+          )
+     except Exception as e:
+          logger.error(f"Error retrieving item {item_id}: {str(e)}")
+          return build_response(
+               success=False
+               message="Internal server error.",
+               status_code=500
+          )
        
 		   
 
