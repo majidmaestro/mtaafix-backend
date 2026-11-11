@@ -9,3 +9,5 @@ logger = logging.getLogger(__name__)
 
 api_bp = Blueprint('api-bp', __name__, url_prefix='/api/v1')
 
+item_schema = ItemSchema()
+items_schema = ItemSchema(many=True)
