@@ -135,4 +135,39 @@ def create_item():
             status_code=500
         )
 
+@api_bp.route('/items/<int:item_id>', methods=['DELETE'])
+def delete_item(item_id):
+    """Safely delete an item entry from the database by ID."""
+    logger.info(f"Attempting to delete item with ID: {item_id}")
+    
+    try:
+        item_to_delete = Item.query.get(item_id)
+        
+        if not item_to_delete:
+            return build_response(
+                success=False, 
+                message=f"Cannot delete. Item with ID {item_id} was not found.",
+                status_code=404
+            )
+            
+        db.session.delete(item_to_delete)
+        db.session.commit()
+        
+        logger.info(f"Successfully deleted item {item_id}")
+        
+        return build_response(
+            success=True, 
+            message=f"Item {item_id} successfully deleted.",
+            status_code=200
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Failed to delete item {item_id}: {str(e)}")
+        return build_response(
+            success=False, 
+            message="An error occurred while attempting to delete the item.",
+            status_code=500
+        )
+
         
