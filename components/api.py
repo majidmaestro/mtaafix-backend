@@ -85,6 +85,54 @@ def get_item_by_id(item_id):
                status_code=500
           )
        
-		   
+@api_bp.route('/items', methods=['POST'])
+def create_item():
+    """Create a new item after validating payload against the schema."""
+    logger.info("Processing POST request to create new item...")
+    
+    json_payload = request.get_json()
+    
+    if not json_payload:
+        return build_response(
+            success=False, 
+            message="Missing request body or content-type is not application/json.",
+            status_code=400
+        )
+
+    try:
+        # Deserialize and validate incoming data using Marshmallow
+        validated_data = item_schema.load(json_payload)
+        
+        # Instantiate and save to database
+        new_item = Item(**validated_data)
+        db.session.add(new_item)
+        db.session.commit()
+        
+        logger.info(f"Successfully created item with ID: {new_item.id}")
+        
+        return build_response(
+            success=True, 
+            message="Item created successfully.",
+            data=item_schema.dump(new_item),
+            status_code=201
+        )
+
+    except ValidationError as err:
+        logger.warning(f"Validation error on create: {err.messages}")
+        return build_response(
+            success=False, 
+            message="Validation failed for submitted fields.",
+            data={"errors": err.messages},
+            status_code=422
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Database commit failed during item creation: {str(e)}")
+        return build_response(
+            success=False, 
+            message="Database error occurred while saving the item.",
+            status_code=500
+        )
 
         
